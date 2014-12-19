@@ -1,5 +1,5 @@
 require "herkko/version"
+require "herkko/runner"
 
 module Herkko
-  # Your code goes here...
 end
