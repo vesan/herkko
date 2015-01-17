@@ -1,3 +1,6 @@
+require "herkko/travis"
+require "open3"
+
 module Herkko
   class Runner
     attr_reader :environment, :command, :arguments
@@ -16,69 +19,96 @@ module Herkko
       if respond_to?(command)
         send(command, *arguments)
       else
-        Kernel.system("heroku", arguments + ["-r#{environment}"])
+        Herkko.run_and_puts("heroku", arguments + ["-r#{environment}"])
       end
     end
 
     def print_usage
-      puts "TODO: Usage instructions"
+      Herkko.info "TODO: Usage instructions"
     end
 
     def deploy
-      puts "Doing deployment to #{environment}"
-      if check_travis == :green
-        puts "Check if there is migrations to be run in this deployment"
+      Herkko.info "Doing deployment to #{environment}..."
+      fetch_currently_deployed_version
+
+      Herkko.info("Deploying changes:")
+
+      puts changelog
+
+      if check_ci == :green
+        Herkko.info "CI is green. Deploying..."
+
         run_migrations = migrations_needed?
-        git_push
+        push_new_code
+
         if run_migrations
           migrate
-          restart
+        else
+          Herkko.info "No need to migrate."
         end
-        # TODO: puts "Check for changes in seed file and remember to run those if present"
+
+        if seed_file_changed?
+          Herkko.info "NOTE: Seed file seem the have changed. Make sure to run it if needed."
+        end
+
         # TODO: puts "Print the after deployment checklist from a file"
       else
-        puts "CI is red. Fix it!"
+        Herkko.info "CI is red. Fix it!"
       end
     end
 
-    def check_travis
-      puts "Checking CI"
+    def check_ci
+      Herkko.info "Checking CI..."
       Herkko::Travis.status_for(current_branch)
     end
 
     def migrate
-      puts "Migrating database"
-      Kernel.system("heroku", "migrate", "-r#{environment}")
+      Herkko.info "Migrating database..."
+      Herkko.run_and_puts %{
+        heroku run rake db:migrate -r #{environment} &&
+        heroku restart -r #{environment}
+      }
     end
 
-    def restart
-      Kernel.system("heroku", "restart", "-r#{environment}")
-    end
-
-    def git_push
-      puts "Pushing code"
-      Kernel.system("git", "push", environment)
+    def push_new_code
+      Herkko.info "Pushing code to Heroku..."
+      Herkko.run_and_puts("git", "push", environment)
     end
 
     private
 
     def current_branch
-      Kernel.system("git", "branch")[2..-1]
+      Herkko.run("git", "rev-parse", "--abbrev-ref", "HEAD")[0].strip
     end
 
     def migrations_needed?
-      Kernel.system("git", "fetch", environment)
-      files = Kernel.system("git", "diff", "--name-only", currently_deployed_to(environment), to_be_deployed_sha)
+      file_changed?("db/migrate")
+    end
 
-      files.any? {|filename| filename.match(/db\/migrate/) }
+    def seed_file_changed?
+      file_changed?("db/seeds.rb")
     end
 
     def currently_deployed_to(environment)
-      Kernel.system("git", "rev-parse" "#{environment}/master")
+      Herkko.run("git", "rev-parse", "#{environment}/master")[0].strip
     end
 
     def to_be_deployed_sha
-      Kernel.system("git", "rev-parse", "HEAD")
+      Herkko.run("git", "rev-parse", "HEAD")[0].strip
+    end
+
+    def file_changed?(file_path)
+      files = Herkko.run("git", "diff", "--name-only", currently_deployed_to(environment), to_be_deployed_sha)[0]
+
+      files.split("\n").any? {|filename| filename.match(Regex.new(file_path)) }
+    end
+
+    def fetch_currently_deployed_version
+      Herkko.run_and_puts("git", "fetch", environment)
+    end
+
+    def changelog
+      Herkko.run("git", "log", "--name-only", "#{currently_deployed_to(environment)}..#{to_be_deployed_sha}")[0]
     end
   end
 end
