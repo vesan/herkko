@@ -16,7 +16,7 @@ module Herkko
     Open3.capture3(*command)
   end
 
-  def self.run_and_puts(*command)
+  def self.run_with_output(*command)
     if @@debug
       puts "--> #{command.join(" ")}"
     end

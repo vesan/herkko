@@ -19,7 +19,7 @@ module Herkko
       if respond_to?(command)
         send(command, *arguments)
       else
-        Herkko.run_and_puts("heroku", arguments + ["-r#{environment}"])
+        Herkko.run_with_output("heroku", arguments + ["-r#{environment}"])
       end
     end
 
@@ -57,6 +57,10 @@ module Herkko
       end
     end
 
+    def console
+      Herkko.run_with_output "heroku run rails console -r #{environment}"
+    end
+
     def check_ci
       Herkko.info "Checking CI..."
       Herkko::Travis.status_for(current_branch)
@@ -64,7 +68,7 @@ module Herkko
 
     def migrate
       Herkko.info "Migrating database..."
-      Herkko.run_and_puts %{
+      Herkko.run_with_output %{
         heroku run rake db:migrate -r #{environment} &&
         heroku restart -r #{environment}
       }
@@ -72,7 +76,7 @@ module Herkko
 
     def push_new_code
       Herkko.info "Pushing code to Heroku..."
-      Herkko.run_and_puts("git", "push", environment)
+      Herkko.run_with_output("git", "push", environment)
     end
 
     private
@@ -104,7 +108,7 @@ module Herkko
     end
 
     def fetch_currently_deployed_version
-      Herkko.run_and_puts("git", "fetch", environment)
+      Herkko.run_with_output("git", "fetch", environment)
     end
 
     def changelog
