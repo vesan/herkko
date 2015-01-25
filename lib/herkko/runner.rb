@@ -61,6 +61,10 @@ module Herkko
       Herkko.run_with_output "heroku run rails console -r #{environment}"
     end
 
+    def seed
+      Herkko.run_with_output "heroku run rake db:seed -r #{environment}"
+    end
+
     def check_ci
       Herkko.info "Checking CI..."
       Herkko::Travis.status_for(current_branch)
