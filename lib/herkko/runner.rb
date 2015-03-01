@@ -108,7 +108,7 @@ module Herkko
     def file_changed?(file_path)
       files = Herkko.run("git", "diff", "--name-only", currently_deployed_to(environment), to_be_deployed_sha)[0]
 
-      files.split("\n").any? {|filename| filename.match(Regex.new(file_path)) }
+      files.split("\n").any? {|filename| filename.match(Regexp.new(file_path)) }
     end
 
     def fetch_currently_deployed_version
