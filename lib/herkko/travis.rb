@@ -22,7 +22,7 @@ module Herkko
     private
 
     def self.fetch_status(branch)
-      Herkko.run("travis", "history", "-l", "1", "-b", branch)
+      Herkko.run("travis", "history", "--skip-version-check", "-l", "1", "-b", branch)
     end
   end
 end
