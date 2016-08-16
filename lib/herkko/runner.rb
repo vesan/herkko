@@ -15,7 +15,11 @@ module Herkko
 
     def run
       if ["version", "--version"].include?(environment)
-        return version
+        return print_version
+      end
+
+      if ["help", "--help"].include?(environment)
+        return print_usage
       end
 
       return print_usage if environment.nil? || command.nil?
@@ -27,15 +31,34 @@ module Herkko
       end
     end
 
-    def version
+    def print_version
       Herkko.puts "Herkko #{Herkko::VERSION}"
     end
 
     def print_usage
       Herkko.puts <<END
-Herkko
+# Herkko
 
-Run `herkko [environment] [command]` for example `herkko production deploy`.
+Run `herkko [remote name] [command]` for example `herkko production deploy`.
+
+There are special commands like `deploy` is a special command that does extra checks. Other commands 
+are just proxied to the heroku CLI tool (for example `herkko production logs`).
+
+## Naming remotes
+
+It's recommended to name your remotes for example production & staging. Then you can always just type `herkko production deploy` to release a new version.
+
+## Commands
+
+console | Opens Rails console
+deploy  | Deploys new version
+seed    | Runs seeds.rb
+migrate | Run migrations and restarts the app
+
+### deploy
+
+--skip-ci-check - Skips the Travis CI build status check
+
 END
     end
 
@@ -78,11 +101,6 @@ END
       Herkko.run_with_output "heroku run rake db:seed -r #{environment}"
     end
 
-    def check_ci
-      Herkko.info "Checking CI..."
-      Herkko::Travis.status_for(current_branch)
-    end
-
     def migrate
       Herkko.info "Migrating database..."
       Herkko.run_with_output %{
@@ -99,6 +117,11 @@ END
     end
 
     private
+
+    def check_ci
+      Herkko.info "Checking CI..."
+      Herkko::Travis.status_for(current_branch)
+    end
 
     def deploy!
       run_migrations = migrations_needed?
