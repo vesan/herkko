@@ -37,7 +37,8 @@ module Herkko
       puts changelog
       puts
 
-      if check_ci == :green
+      ci_state = check_ci
+      if ci_state == :green
         Herkko.info "CI is green. Deploying..."
 
         run_migrations = migrations_needed?
@@ -54,6 +55,8 @@ module Herkko
         end
 
         # TODO: puts "Print the after deployment checklist from a file"
+      elsif ci_state == :yellow
+        Herkko.info "CI is running. Wait a while."
       else
         Herkko.info "CI is red. Fix it!"
       end
