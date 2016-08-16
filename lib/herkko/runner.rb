@@ -70,23 +70,6 @@ END
       end
     end
 
-    def deploy!
-      run_migrations = migrations_needed?
-      push_new_code
-
-      if run_migrations
-        migrate
-      else
-        Herkko.info "No need to migrate."
-      end
-
-      if seed_file_changed?
-        Herkko.info "NOTE: Seed file seem the have changed. Make sure to run it if needed."
-      end
-
-      # TODO: puts "Print the after deployment checklist from a file"
-    end
-
     def console
       Herkko.run_with_output "heroku run rails console -r #{environment}"
     end
@@ -116,6 +99,23 @@ END
     end
 
     private
+
+    def deploy!
+      run_migrations = migrations_needed?
+      push_new_code
+
+      if run_migrations
+        migrate
+      else
+        Herkko.info "No need to migrate."
+      end
+
+      if seed_file_changed?
+        Herkko.info "NOTE: Seed file seem the have changed. Make sure to run it if needed."
+      end
+
+      # TODO: puts "Print the after deployment checklist from a file"
+    end
 
     def skip_ci_check?
       arguments.include?("--skip-ci-check")
