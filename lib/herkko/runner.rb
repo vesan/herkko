@@ -23,7 +23,7 @@ module Herkko
       if respond_to?(command)
         send(command)
       else
-        Herkko.run_with_output("heroku", arguments + ["-r#{environment}"])
+        Herkko.run_with_output("heroku", command, arguments, "-r#{environment}")
       end
     end
 

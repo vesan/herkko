@@ -21,6 +21,8 @@ module Herkko
   end
 
   def self.run_with_output(*command)
+    command = command.flatten.compact
+
     if @@debug
       Kernel.puts "--> #{command.join(" ")}"
     end
