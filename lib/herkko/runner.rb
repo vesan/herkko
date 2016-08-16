@@ -111,7 +111,7 @@ END
     def push_new_code
       Herkko.info "Pushing code to Heroku..."
       puts
-      Herkko.run_with_output("git", "push", environment)
+      Herkko.run_with_output("git", "push", environment, "master")
       puts
     end
 
