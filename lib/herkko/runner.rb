@@ -14,6 +14,10 @@ module Herkko
     end
 
     def run
+      if ["version", "--version"].include?(environment)
+        return version
+      end
+
       return print_usage if environment.nil? || command.nil?
 
       if respond_to?(command)
@@ -23,8 +27,16 @@ module Herkko
       end
     end
 
+    def version
+      Herkko.puts "Herkko #{Herkko::VERSION}"
+    end
+
     def print_usage
-      Herkko.info "Run `herkko [environment] [command]` for example `herkko production deploy`"
+      Herkko.puts <<END
+Herkko
+
+Run `herkko [environment] [command]` for example `herkko production deploy`.
+END
     end
 
     def deploy

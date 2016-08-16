@@ -5,12 +5,16 @@ module Herkko
   @@debug = false
 
   def self.info(text)
-    puts "-> " + text
+    Kernel.puts "-> " + text
+  end
+
+  def self.puts(text)
+    Kernel.puts text
   end
 
   def self.run(*command)
     if @@debug
-      puts "--> #{command.join(" ")}"
+      Kernel.puts "--> #{command.join(" ")}"
     end
 
     Open3.capture3(*command)
@@ -18,7 +22,7 @@ module Herkko
 
   def self.run_with_output(*command)
     if @@debug
-      puts "--> #{command.join(" ")}"
+      Kernel.puts "--> #{command.join(" ")}"
     end
 
     Kernel.system(*command)
