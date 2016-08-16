@@ -17,14 +17,14 @@ module Herkko
       return print_usage if environment.nil? || command.nil?
 
       if respond_to?(command)
-        send(command, *arguments)
+        send(command)
       else
         Herkko.run_with_output("heroku", arguments + ["-r#{environment}"])
       end
     end
 
     def print_usage
-      Herkko.info "TODO: Usage instructions"
+      Herkko.info "Run `herkko [environment] [command]` for example `herkko production deploy`"
     end
 
     def deploy
@@ -37,29 +37,42 @@ module Herkko
       puts changelog
       puts
 
-      ci_state = check_ci
+      ci_state = if skip_ci_check?
+        :skip
+      else
+        check_ci
+      end
+
       if ci_state == :green
         Herkko.info "CI is green. Deploying..."
 
-        run_migrations = migrations_needed?
-        push_new_code
+        deploy!
+      elsif ci_state == :skip
+        Herkko.info "Skipping CI. Deploying..."
 
-        if run_migrations
-          migrate
-        else
-          Herkko.info "No need to migrate."
-        end
-
-        if seed_file_changed?
-          Herkko.info "NOTE: Seed file seem the have changed. Make sure to run it if needed."
-        end
-
-        # TODO: puts "Print the after deployment checklist from a file"
+        deploy!
       elsif ci_state == :yellow
         Herkko.info "CI is running. Wait a while."
       else
         Herkko.info "CI is red. Fix it!"
       end
+    end
+
+    def deploy!
+      run_migrations = migrations_needed?
+      push_new_code
+
+      if run_migrations
+        migrate
+      else
+        Herkko.info "No need to migrate."
+      end
+
+      if seed_file_changed?
+        Herkko.info "NOTE: Seed file seem the have changed. Make sure to run it if needed."
+      end
+
+      # TODO: puts "Print the after deployment checklist from a file"
     end
 
     def console
@@ -91,6 +104,10 @@ module Herkko
     end
 
     private
+
+    def skip_ci_check?
+      arguments.include?("--skip-ci-check")
+    end
 
     def current_branch
       Herkko.run("git", "rev-parse", "--abbrev-ref", "HEAD")[0].strip
