@@ -33,7 +33,9 @@ module Herkko
 
       Herkko.info("Deploying changes:")
 
+      puts
       puts changelog
+      puts
 
       if check_ci == :green
         Herkko.info "CI is green. Deploying..."
@@ -80,7 +82,9 @@ module Herkko
 
     def push_new_code
       Herkko.info "Pushing code to Heroku..."
+      puts
       Herkko.run_with_output("git", "push", environment)
+      puts
     end
 
     private
@@ -116,7 +120,7 @@ module Herkko
     end
 
     def changelog
-      Herkko.run("git", "log", "--name-only", "#{currently_deployed_to(environment)}..#{to_be_deployed_sha}")[0]
+      Herkko.run("git", "log", "--pretty=short", "#{currently_deployed_to(environment)}..#{to_be_deployed_sha}")[0]
     end
   end
 end
