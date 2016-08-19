@@ -50,16 +50,22 @@ It's recommended to name your remotes for example production & staging. Then you
 
 ## Commands
 
-console | Opens Rails console
-deploy  | Deploys new version
-seed    | Runs seeds.rb
-migrate | Run migrations and restarts the app
+console   | Opens Rails console
+deploy    | Deploys new version
+seed      | Runs seeds.rb
+migrate   | Run migrations and restarts the app
+changelog | Prints the commits to be deployed
 
 ### deploy
 
 --skip-ci-check - Skips the Travis CI build status check
 
 END
+    end
+
+    def changelog
+      fetch_currently_deployed_version
+      puts git_changelog
     end
 
     def deploy
@@ -69,7 +75,7 @@ END
       Herkko.info("Deploying changes:")
 
       puts
-      puts changelog
+      puts git_changelog
       puts
 
       ci_state = if skip_ci_check?
@@ -174,7 +180,7 @@ END
       Herkko.run_with_output("git", "fetch", environment)
     end
 
-    def changelog
+    def git_changelog
       Herkko.run("git", "log", "--pretty='format:%C(yellow)%h %Cblue%ad%Creset %an %Cgreen%s%Creset'", "--date=short", "#{currently_deployed_to(environment)}..#{to_be_deployed_sha}")[0]
     end
   end
