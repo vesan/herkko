@@ -141,7 +141,7 @@ END
     end
 
     def skip_ci_check?
-      arguments.include?("--skip-ci-check")
+      arguments && arguments.include?("--skip-ci-check")
     end
 
     def current_branch
