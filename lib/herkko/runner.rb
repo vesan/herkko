@@ -175,7 +175,7 @@ END
     end
 
     def changelog
-      Herkko.run("git", "log", "--pretty=short", "#{currently_deployed_to(environment)}..#{to_be_deployed_sha}")[0]
+      Herkko.run("git", "log", "--pretty='format:%C(yellow)%h %Cblue%ad%Creset %an %Cgreen%s%Creset'", "--date=short", "#{currently_deployed_to(environment)}..#{to_be_deployed_sha}")[0]
     end
   end
 end
