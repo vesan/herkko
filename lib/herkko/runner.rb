@@ -94,6 +94,8 @@ END
         deploy!
       elsif ci_state == :yellow
         Herkko.info "CI is running. Wait a while."
+      elsif ci_state == :not_used
+        Herkko.info "CI not in use for this project. Deploying..."
       else
         Herkko.info "CI is in unknown state. Can't continue."
       end

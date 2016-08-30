@@ -9,13 +9,17 @@ module Herkko
           Herkko.info "There was an error with checking Travis: #{status[1]}"
           :red
         else
-          case status[0].split(":")[0]
-          when /passed/
-            :green
-          when /started/
-            :yellow
+          if status[0].strip.length == 0
+            :not_used
           else
-            :red
+            case status[0].split(":")[0]
+            when /passed/
+              :green
+            when /started/
+              :yellow
+            else
+              :red
+            end
           end
         end
       else
