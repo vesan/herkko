@@ -95,7 +95,7 @@ END
       elsif ci_state == :yellow
         Herkko.info "CI is running. Wait a while."
       else
-        Herkko.info "CI is red. Fix it!"
+        Herkko.info "CI is in unknown state. Can't continue."
       end
     end
 
@@ -126,7 +126,8 @@ END
 
     def check_ci
       Herkko.info "Checking CI..."
-      Herkko::Travis.status_for(current_branch)
+
+      travis_client.status_for(current_branch)
     end
 
     def deploy!
@@ -182,6 +183,10 @@ END
 
     def git_changelog
       Herkko.run("git", "log", "--pretty=format:%C(yellow)%h %Cblue%ad%Creset %an %Cgreen%s%Creset", "--date=short", "#{currently_deployed_to(environment)}..#{to_be_deployed_sha}")[0]
+    end
+
+    def travis_client
+      @travis_client ||= Herkko::Travis.new
     end
   end
 end
