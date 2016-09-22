@@ -141,7 +141,7 @@ module Herkko
         disable_maintenance_mode
       end
 
-      # TODO: puts "Print the after deployment checklist from a file"
+      print_after_deployment_instructions
     end
 
     def skip_ci_check?
@@ -184,6 +184,18 @@ module Herkko
 
     def git_changelog
       Herkko.run("git", "log", "--pretty=format:%C(yellow)%h %Cblue%ad%Creset %an %Cgreen%s%Creset", "--date=short", "#{currently_deployed_to(environment)}..#{to_be_deployed_sha}")[0]
+    end
+
+    def print_after_deployment_instructions
+      after_deployment_instructions = Dir.glob(File.join(Dir.pwd, "after_deployment.*"))
+      if after_deployment_instructions.any?
+        Herkko.info "After deployment instructions:"
+        after_deployment_instructions.each do |file_name|
+          puts
+          puts File.read(file_name)
+          puts
+        end
+      end
     end
 
     def travis_client
