@@ -18,7 +18,7 @@ module Herkko
         return print_version
       end
 
-      if ["help", "--help"].include?(environment)
+      if ["help", "--help", "usage"].include?(environment)
         return print_usage
       end
 
@@ -36,32 +36,7 @@ module Herkko
     end
 
     def print_usage
-      Herkko.puts <<END
-# Herkko
-
-Run `herkko [remote name] [command]` for example `herkko production deploy`.
-
-There are special commands like `deploy` is a special command that does extra checks. Other commands 
-are just proxied to the heroku CLI tool (for example `herkko production logs`).
-
-## Naming remotes
-
-It's recommended to name your remotes for example production & staging. Then you can always just type `herkko production deploy` to release a new version.
-
-## Commands
-
-console   | Opens Rails console
-deploy    | Deploys new version
-seed      | Runs seeds.rb
-migrate   | Run migrations and restarts the app
-changelog | Prints the commits to be deployed
-
-### deploy
-
---skip-ci-check - Skips the Travis CI build status check
---maintenance-mode - Puts the application to maintenance mode for the duration of the deployment
-
-END
+      Herkko.puts File.read(File.join(File.dirname(__FILE__), "..", "..", "usage.txt"))
     end
 
     def changelog
