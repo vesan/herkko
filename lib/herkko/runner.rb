@@ -25,7 +25,7 @@ module Herkko
       return print_usage if environment.nil? || command.nil?
 
       if respond_to?(command)
-        send(command)
+        public_send(command)
       else
         Herkko.run_with_output("heroku", command, arguments, "-r#{environment}")
       end
@@ -59,6 +59,7 @@ changelog | Prints the commits to be deployed
 ### deploy
 
 --skip-ci-check - Skips the Travis CI build status check
+--maintenance-mode - Puts the application to maintenance mode for the duration of the deployment
 
 END
     end
@@ -126,6 +127,14 @@ END
       puts
     end
 
+    def enable_maintenance_mode
+      Herkko.run_with_output "heroku", "maintenance:on", "-r", environment
+    end
+
+    def disable_maintenance_mode
+      Herkko.run_with_output "heroku", "maintenance:off", "-r", environment
+    end
+
     private
 
     def check_ci
@@ -136,6 +145,11 @@ END
 
     def deploy!
       run_migrations = migrations_needed?
+
+      if use_maintenace_mode?
+        enable_maintenance_mode
+      end
+
       push_new_code
 
       if run_migrations
@@ -148,11 +162,19 @@ END
         Herkko.info "NOTE: Seed file seem the have changed. Make sure to run it if needed."
       end
 
+      if use_maintenace_mode?
+        disable_maintenance_mode
+      end
+
       # TODO: puts "Print the after deployment checklist from a file"
     end
 
     def skip_ci_check?
       arguments && arguments.include?("--skip-ci-check")
+    end
+
+    def use_maintenace_mode?
+      arguments && arguments.include?("--maintenance-mode")
     end
 
     def current_branch
