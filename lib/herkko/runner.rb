@@ -74,8 +74,10 @@ module Herkko
         deploy!
       elsif ci_state == :yellow
         Herkko.info "CI is running. Wait a while."
+      elsif ci_state == :red
+        Herkko.info "CI is red. Not deploying."
       else
-        Herkko.info "CI is in unknown state. Can't continue."
+        Herkko.info "CI is in unknown state (#{ci_state}). Can't continue."
       end
     end
 
