@@ -14,9 +14,15 @@ Herkko uses the git remote names to identify the applications. Usually you have 
 
 TODO: How to setup project for Herkko
 
+To deploy current branch to production:
+
+    $ heroku production deploy
+
+Running the command will check Travis CI, deploy if the build is green and runs the migrations after the deployment if commits with migrations were deployed.
+
 ## Commands
 
-deploy
+### deploy
 
 You can add a file in `doc/after_deployment.{md, txt, rdoc, whatever}` and it
 will be printed after a succesful deployment.  It can have for example a
@@ -25,6 +31,10 @@ checklist like:
 * Open the site in the browser and see that it loads.
 * Stay alert for a while for exceptions.
 * Inform the client if it is needed (Basecamp, email, SMS...)
+
+### console
+
+Open rails console for the application.
 
 ## Contributing
 
