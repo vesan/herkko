@@ -17,6 +17,8 @@ module Herkko
               :green
             when /started/
               :yellow
+            when /created/
+              :queued
             else
               :red
             end

@@ -74,6 +74,8 @@ module Herkko
         deploy!
       elsif ci_state == :yellow
         Herkko.info "CI is running. Wait a while."
+      elsif ci_state == :queued
+        Herkko.info "Build is queued in CI. Wait a while."
       elsif ci_state == :red
         Herkko.info "CI is red. Not deploying."
       else
