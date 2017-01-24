@@ -16,7 +16,7 @@ TODO: How to setup project for Herkko
 
 To deploy current branch to production:
 
-    $ heroku production deploy
+    $ herkko production deploy
 
 Running the command will check Travis CI, deploy if the build is green and runs the migrations after the deployment if commits with migrations were deployed.
 
