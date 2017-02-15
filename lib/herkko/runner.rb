@@ -13,7 +13,7 @@ module Herkko
       end
     end
 
-    def run
+    def call
       if ["version", "--version"].include?(environment)
         return print_version
       end
