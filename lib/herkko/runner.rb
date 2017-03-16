@@ -45,7 +45,7 @@ module Herkko
     end
 
     def deploy
-      Herkko.info "Doing deployment to #{environment}..."
+      Herkko.info "Doing #{forced? ? "forced(!) " : ""}deployment to #{environment}..."
       fetch_currently_deployed_version
 
       Herkko.info("Deploying changes:")
@@ -99,10 +99,14 @@ module Herkko
       }
     end
 
+    def forced?
+      arguments && arguments.include?("--force")
+    end
+
     def push_new_code
-      Herkko.info "Pushing code to Heroku..."
+      Herkko.info "Pushing commit #{to_be_deployed_sha} from branch #{current_branch} to Heroku..."
       puts
-      Herkko.run_with_output("git", "push", environment, "master")
+      Herkko.run_with_output("git", "push", environment, "#{to_be_deployed_sha}:master", forced? ? "--force" : nil)
       puts
     end
 
@@ -156,16 +160,16 @@ module Herkko
       arguments && arguments.include?("--maintenance-mode")
     end
 
-    def current_branch
-      Herkko.run("git", "rev-parse", "--abbrev-ref", "HEAD")[0].strip
-    end
-
     def migrations_needed?
       file_changed?("db/migrate")
     end
 
     def seed_file_changed?
       file_changed?("db/seeds.rb")
+    end
+
+    def current_branch
+      Herkko.run("git", "rev-parse", "--abbrev-ref", "HEAD")[0].strip
     end
 
     def currently_deployed_to(environment)
