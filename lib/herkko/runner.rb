@@ -48,6 +48,9 @@ module Herkko
       Herkko.info "Doing #{forced? ? "forced(!) " : ""}deployment to #{environment}..."
       fetch_currently_deployed_version
 
+      Herkko.info "Pushing commit #{to_be_deployed_sha} from branch #{current_branch} to Heroku..."
+      puts
+
       Herkko.info("Deploying changes:")
 
       puts
@@ -104,8 +107,6 @@ module Herkko
     end
 
     def push_new_code
-      Herkko.info "Pushing commit #{to_be_deployed_sha} from branch #{current_branch} to Heroku..."
-      puts
       Herkko.run_with_output("git", "push", environment, "#{to_be_deployed_sha}:master", forced? ? "--force" : nil)
       puts
     end
