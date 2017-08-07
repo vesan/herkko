@@ -8,14 +8,17 @@ Gem::Specification.new do |spec|
   spec.version       = Herkko::VERSION
   spec.authors       = ["Vesa Vänskä"]
   spec.email         = ["vesa@vesavanska.com"]
+
   spec.summary       = %q{Herkko is a deployment tool for Heroku.}
   spec.description   = %q{It's highly opinionated and might not suit your needs. It has certain conventions you need to follow, but it also provides great user experience based on those conventions.}
   spec.homepage      = "https://github.com/vesan/herkko"
   spec.license       = "MIT"
 
-  spec.files         = `git ls-files -z`.split("\x0")
-  spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
-  spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
+  spec.files         = `git ls-files -z`.split("\x0").reject do |f|
+    f.match(%r{^(test|spec|features)/})
+  end
+  spec.bindir        = "exe"
+  spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
   spec.add_development_dependency "bundler", "~> 1.7"
