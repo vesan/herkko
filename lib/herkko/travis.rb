@@ -32,7 +32,7 @@ module Herkko
     end
 
     def status_to_code(status)
-      if status[1].empty?
+      if !status[1].empty?
         Herkko.info "There was an error with checking Travis: #{status[1]}"
         :red
       elsif status[0].strip.empty?
