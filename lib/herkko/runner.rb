@@ -36,7 +36,10 @@ module Herkko
     end
 
     def print_usage
-      Herkko.puts File.read(File.join(File.dirname(__FILE__), "..", "..", "usage.txt"))
+      usage_contents = File.read(
+        File.join(File.dirname(__FILE__), "..", "..", "usage.txt")
+      )
+      Herkko.puts usage_contents
     end
 
     def changelog
@@ -107,7 +110,13 @@ module Herkko
     end
 
     def push_new_code
-      Herkko.run_with_output("git", "push", environment, "#{to_be_deployed_sha}:master", forced? ? "--force" : nil)
+      Herkko.run_with_output(
+        "git",
+        "push",
+        environment,
+        "#{to_be_deployed_sha}:master",
+        forced? ? "--force" : nil
+      )
       puts
     end
 
@@ -130,31 +139,33 @@ module Herkko
     def deploy!
       run_migrations = migrations_needed?
 
-      if use_maintenace_mode?
-        enable_maintenance_mode
-      end
+      in_maintenance_mode do
+        push_new_code
 
-      push_new_code
-
-      if run_migrations
-        if procfile_release_defined?
-          Herkko.info "This release has new migrations but because project has Release Phase defined in Procfile, the migrations are not automatically run."
+        if run_migrations
+          if procfile_release_defined?
+            Herkko.info "This release has new migrations but because project has Release Phase defined in Procfile, the migrations are not automatically run."
+          else
+            migrate
+          end
         else
-          migrate
+          Herkko.info "No need to migrate."
         end
-      else
-        Herkko.info "No need to migrate."
-      end
 
-      if seed_file_changed?
-        Herkko.info "NOTE: Seed file seem the have changed. Make sure to run it if needed."
-      end
-
-      if use_maintenace_mode?
-        disable_maintenance_mode
+        if seed_file_changed?
+          Herkko.info "NOTE: Seed file seem the have changed. Make sure to run it if needed."
+        end
       end
 
       print_after_deployment_instructions
+    end
+
+    def in_maintenance_mode
+      enable_maintenance_mode if use_maintenace_mode?
+
+      yield
+
+      disable_maintenance_mode if use_maintenace_mode?
     end
 
     def skip_ci_check?
@@ -193,7 +204,13 @@ module Herkko
     end
 
     def file_changed?(file_path)
-      files = Herkko.run("git", "diff", "--name-only", currently_deployed_to(environment), to_be_deployed_sha)[0]
+      files = Herkko.run(
+        "git",
+        "diff",
+        "--name-only",
+        currently_deployed_to(environment),
+        to_be_deployed_sha
+      )[0]
 
       files.split("\n").any? {|filename| filename.match(Regexp.new(file_path)) }
     end
@@ -203,11 +220,19 @@ module Herkko
     end
 
     def git_changelog
-      Herkko.run("git", "log", "--pretty=format:%C(yellow)%h %Cblue%ad%Creset %an %Cgreen%s%Creset", "--date=short", "#{currently_deployed_to(environment)}..#{to_be_deployed_sha}")[0]
+      Herkko.run(
+        "git",
+        "log",
+        "--pretty=format:%C(yellow)%h %Cblue%ad%Creset %an %Cgreen%s%Creset",
+        "--date=short",
+        "#{currently_deployed_to(environment)}..#{to_be_deployed_sha}"
+      )[0]
     end
 
     def print_after_deployment_instructions
-      after_deployment_instructions = Dir.glob(File.join(Dir.pwd, "after_deployment.*"))
+      after_deployment_instructions = Dir.glob(
+        File.join(Dir.pwd, "after_deployment.*")
+      )
       if after_deployment_instructions.any?
         Herkko.info "After deployment instructions:"
         after_deployment_instructions.each do |file_name|

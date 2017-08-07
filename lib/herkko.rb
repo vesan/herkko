@@ -1,6 +1,7 @@
 require "herkko/version"
 require "herkko/runner"
 
+# Main module of Herkko deployment tool.
 module Herkko
   @@debug = false
 
