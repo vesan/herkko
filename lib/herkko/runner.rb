@@ -137,7 +137,11 @@ module Herkko
       push_new_code
 
       if run_migrations
-        migrate
+        if procfile_release_defined?
+          Herkko.info "This release has new migrations but because project has Release Phase defined in Procfile, the migrations are not automatically run."
+        else
+          migrate
+        end
       else
         Herkko.info "No need to migrate."
       end
@@ -167,6 +171,13 @@ module Herkko
 
     def seed_file_changed?
       file_changed?("db/seeds.rb")
+    end
+
+    def procfile_release_defined?
+      return false unless File.exist?("Procfile")
+
+      procfile_contents = File.read("Procfile")
+      !!procfile_contents.match(/^release:/)
     end
 
     def current_branch
