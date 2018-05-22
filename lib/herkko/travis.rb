@@ -28,7 +28,7 @@ module Herkko
     end
 
     def travis_cli_installed?
-      system("which travis > /dev/null 2>&1")
+      system("command -v travis > /dev/null 2>&1")
     end
 
     def status_to_code(status)
